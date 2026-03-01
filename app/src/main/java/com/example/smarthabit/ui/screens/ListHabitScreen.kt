@@ -19,7 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.smarthabit.getSampleHabits
+//import com.example.smarthabit.getSampleHabits
 
 @Composable
 fun ListHabitScreen(
@@ -27,7 +27,8 @@ fun ListHabitScreen(
     onOpenAddHabitScreen: () -> Unit,
 ) {
 
-    val habits = getSampleHabits()
+
+    //val habits = getSampleHabits()
 
     Column(
         modifier = modifier
@@ -48,12 +49,15 @@ fun ListHabitScreen(
             )
         }
 
+
+        /*
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
         ) {
+
             items(habits) { habit ->
 
                 Card(
@@ -72,6 +76,8 @@ fun ListHabitScreen(
                 }
             }
         }
+        */
+
 
         Button(
             onClick = onOpenAddHabitScreen,

@@ -15,6 +15,7 @@ import com.example.smarthabit.ui.navigation.NVDisplay
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContent {
             SmartHabitTheme {
