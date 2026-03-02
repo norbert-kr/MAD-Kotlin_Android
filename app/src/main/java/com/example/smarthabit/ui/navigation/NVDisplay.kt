@@ -17,6 +17,7 @@ import com.example.smarthabit.database.entity.HabitItem
 import com.example.smarthabit.ui.screens.LoginScreen
 import com.example.smarthabit.ui.screens.ListHabitScreen
 import com.example.smarthabit.ui.screens.AddHabitScreen
+import com.example.smarthabit.ui.screens.ViewHabitScreen
 import com.example.smarthabit.viewmodel.HabitViewModel
 
 @Composable
@@ -64,7 +65,10 @@ fun NVDisplay(modifier: Modifier = Modifier) {
                             onOpenAddHabitScreen = {
                                 backStack.add(NavObjects.AddHabitScreen)
                             },
-                            onEditHabit = { habit: HabitItem ->
+                            onViewHabit = { habit ->
+                                backStack.add(NavObjects.ViewHabitScreen(habit))
+                            },
+                            onEditHabit = { habit ->
                                 backStack.add(NavObjects.EditHabitScreen(habit))
                             },
                             onDeleteHabit = { habit ->
@@ -95,6 +99,15 @@ fun NVDisplay(modifier: Modifier = Modifier) {
                                 vm.upsertHabit(habit)
                                 backStack.removeLastOrNull()
                             }
+                        )
+                    }
+
+                is NavObjects.ViewHabitScreen ->
+                    NavEntry(route) {
+                        ViewHabitScreen(
+                            modifier = modifier,
+                            habit = route.habit,
+                            onUp = { backStack.removeLastOrNull() }
                         )
                     }
 

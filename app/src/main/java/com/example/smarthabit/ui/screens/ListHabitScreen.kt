@@ -32,6 +32,7 @@ fun ListHabitScreen(
     modifier: Modifier = Modifier,
     habits: List<HabitItem>,
     onOpenAddHabitScreen: () -> Unit,
+    onViewHabit: (HabitItem) -> Unit,
     onEditHabit: (HabitItem) -> Unit,
     onDeleteHabit: (HabitItem) -> Unit,
 ) {
@@ -90,18 +91,18 @@ fun ListHabitScreen(
                         }
 
                         Row {
-                            IconButton(
-                                onClick = { onEditHabit(habit) }
-                            ) {
+                            IconButton(onClick = { onViewHabit(habit) }) {
+                                Text("View")
+                            }
+
+                            IconButton(onClick = { onEditHabit(habit) }) {
                                 Icon(
                                     imageVector = Icons.Default.Edit,
                                     contentDescription = "Edit"
                                 )
                             }
 
-                            IconButton(
-                                onClick = { onDeleteHabit(habit) }
-                            ) {
+                            IconButton(onClick = { onDeleteHabit(habit) }) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
                                     contentDescription = "Delete"

@@ -184,7 +184,7 @@ fun AddHabitScreen(
                 modifier = Modifier.width(250.dp)
             ) {
                 Text(
-                    if (isEditing) "Update Habit" else "Add Habit",
+                    if (isEditing) "Update Habit" else "+ Add Habit",
                     fontSize = 20.sp
                 )
             }
