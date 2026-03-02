@@ -19,6 +19,7 @@ import com.example.smarthabit.ui.screens.ListHabitScreen
 import com.example.smarthabit.ui.screens.AddHabitScreen
 import com.example.smarthabit.ui.screens.ViewHabitScreen
 import com.example.smarthabit.viewmodel.HabitViewModel
+import com.example.smarthabit.viewmodel.LogViewModel
 
 @Composable
 fun NVDisplay(modifier: Modifier = Modifier) {
@@ -29,17 +30,30 @@ fun NVDisplay(modifier: Modifier = Modifier) {
 
     val context = LocalContext.current.applicationContext
 
-    val dao = remember(context) {
-        DatabaseInstance.getDatabase(context).habitDao()
+    // 🔹 Get full database instance
+    val database = remember(context) {
+        DatabaseInstance.getDatabase(context)
     }
 
-    val vm: HabitViewModel = viewModel(
+    // 🔹 Habit ViewModel
+    val habitVm: HabitViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { HabitViewModel(dao) }
+            initializer {
+                HabitViewModel(database.habitDao())
+            }
         }
     )
 
-    val habits by vm.habits.collectAsStateWithLifecycle()
+    // 🔹 Log ViewModel
+    val logVm: LogViewModel = viewModel(
+        factory = viewModelFactory {
+            initializer {
+                LogViewModel(database.logDao())
+            }
+        }
+    )
+
+    val habits by habitVm.habits.collectAsStateWithLifecycle()
 
     NavDisplay(
         backStack = backStack,
@@ -72,7 +86,7 @@ fun NVDisplay(modifier: Modifier = Modifier) {
                                 backStack.add(NavObjects.EditHabitScreen(habit))
                             },
                             onDeleteHabit = { habit ->
-                                vm.deleteHabit(habit)
+                                habitVm.deleteHabit(habit)
                             }
                         )
                     }
@@ -83,7 +97,7 @@ fun NVDisplay(modifier: Modifier = Modifier) {
                             modifier = modifier,
                             onUp = { backStack.removeLastOrNull() },
                             onSaveHabit = { habit ->
-                                vm.upsertHabit(habit)
+                                habitVm.upsertHabit(habit)
                                 backStack.removeLastOrNull()
                             }
                         )
@@ -96,7 +110,7 @@ fun NVDisplay(modifier: Modifier = Modifier) {
                             existingHabit = route.habit,
                             onUp = { backStack.removeLastOrNull() },
                             onSaveHabit = { habit ->
-                                vm.upsertHabit(habit)
+                                habitVm.upsertHabit(habit)
                                 backStack.removeLastOrNull()
                             }
                         )
@@ -107,7 +121,12 @@ fun NVDisplay(modifier: Modifier = Modifier) {
                         ViewHabitScreen(
                             modifier = modifier,
                             habit = route.habit,
-                            onUp = { backStack.removeLastOrNull() }
+                            onUp = { backStack.removeLastOrNull() },
+                            onToggleStatus = { updatedHabit ->
+                                habitVm.upsertHabit(updatedHabit)
+                                backStack.removeLastOrNull()
+                            },
+                            logVm = logVm   // 🔹 Pass LogViewModel here
                         )
                     }
 
