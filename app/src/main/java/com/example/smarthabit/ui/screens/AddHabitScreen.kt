@@ -29,39 +29,48 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.smarthabit.database.entity.HabitItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddHabitScreen(
     modifier: Modifier = Modifier,
-    onUp: () -> Unit
+    existingHabit: HabitItem? = null,
+    onUp: () -> Unit,
+    onSaveHabit: (HabitItem) -> Unit
 ) {
 
-    var habitName by remember { mutableStateOf("") }
+
+    var habitName by remember(existingHabit) {
+        mutableStateOf(existingHabit?.habitName ?: "")
+    }
 
     val categories = listOf("Health", "Study", "Fitness", "Wellbeing", "Other...")
-    var selectedCategory by remember { mutableStateOf("") }
+    var selectedCategory by remember(existingHabit) {
+        mutableStateOf(existingHabit?.habitCategory ?: "")
+    }
     var categoryExpanded by remember { mutableStateOf(false) }
 
     val habitTypes = listOf("Daily", "Weekly")
-    var selectedHabitType by remember { mutableStateOf("") }
+    var selectedHabitType by remember(existingHabit) {
+        mutableStateOf(existingHabit?.targetType ?: "")
+    }
     var typeExpanded by remember { mutableStateOf(false) }
+
+    val isEditing = existingHabit != null
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        "Add Habit",
+                        if (isEditing) "Edit Habit" else "Add Habit",
                         fontSize = 30.sp
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onUp) {
-                        Icon(
-                            Icons.Filled.ArrowBack,
-                            contentDescription = "Go back"
-                        )
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Go back")
                     }
                 }
             )
@@ -85,7 +94,7 @@ fun AddHabitScreen(
                 modifier = Modifier.width(380.dp)
             )
 
-            Spacer(modifier = Modifier.height(70.dp))
+            Spacer(modifier = Modifier.height(60.dp))
 
             ExposedDropdownMenuBox(
                 expanded = categoryExpanded,
@@ -101,9 +110,7 @@ fun AddHabitScreen(
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded)
                     },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .width(380.dp)
+                    modifier = Modifier.menuAnchor().width(380.dp)
                 )
 
                 ExposedDropdownMenu(
@@ -122,7 +129,7 @@ fun AddHabitScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(70.dp))
+            Spacer(modifier = Modifier.height(60.dp))
 
             ExposedDropdownMenuBox(
                 expanded = typeExpanded,
@@ -138,9 +145,7 @@ fun AddHabitScreen(
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeExpanded)
                     },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .width(380.dp)
+                    modifier = Modifier.menuAnchor().width(380.dp)
                 )
 
                 ExposedDropdownMenu(
@@ -159,13 +164,29 @@ fun AddHabitScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(140.dp))
+            Spacer(modifier = Modifier.height(120.dp))
 
             Button(
-                onClick = { },
+                onClick = {
+
+                    val habit = existingHabit?.copy(
+                        habitName = habitName.trim(),
+                        habitCategory = selectedCategory,
+                        targetType = selectedHabitType
+                    ) ?: HabitItem(
+                        habitName = habitName.trim(),
+                        habitCategory = selectedCategory,
+                        targetType = selectedHabitType
+                    )
+
+                    onSaveHabit(habit)
+                },
                 modifier = Modifier.width(250.dp)
             ) {
-                Text("Add Habit")
+                Text(
+                    if (isEditing) "Update Habit" else "Add Habit",
+                    fontSize = 20.sp
+                )
             }
         }
     }
