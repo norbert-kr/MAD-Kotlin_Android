@@ -208,14 +208,16 @@ fun AddHabitScreen(
                 }
             }
 
-            // Save Button
             Button(
                 onClick = {
 
-                    val frequencyInt =
-                        if (selectedHabitType == "Weekly")
-                            selectedFrequency.substringBefore(" ").toIntOrNull()
-                        else null
+                    val frequencyInt = when (selectedHabitType) {
+                        "Daily" -> 1
+                        "Weekly" -> selectedFrequency
+                            .substringBefore(" ")
+                            .toIntOrNull() ?: 1
+                        else -> 1
+                    }
 
                     val habit = existingHabit?.copy(
                         habitName = habitName.trim(),
@@ -233,11 +235,12 @@ fun AddHabitScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    if (isEditing) "Update Habit" else "Add Habit",
-                    fontSize = 20.sp
-                )
+                Text(if (isEditing) "Update Habit" else "Add Habit", fontSize = 20.sp)
             }
+
+
+
         }
+
     }
 }

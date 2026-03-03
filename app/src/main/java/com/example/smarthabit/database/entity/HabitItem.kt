@@ -13,9 +13,10 @@ data class HabitItem(
 
     val habitName: String,
     val habitCategory: String,
+
     val targetType: String,
-    val status: String = "Ongoing",
+
     val startDate: Long = System.currentTimeMillis(),
-    val endDate: Long? = null,
-    val targetTimesPerWeek: Int? = null
+
+    val targetTimesPerWeek: Int
 )
