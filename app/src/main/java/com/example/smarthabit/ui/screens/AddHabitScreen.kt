@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -40,7 +41,6 @@ fun AddHabitScreen(
     onSaveHabit: (HabitItem) -> Unit
 ) {
 
-
     var habitName by remember(existingHabit) {
         mutableStateOf(existingHabit?.habitName ?: "")
     }
@@ -56,6 +56,15 @@ fun AddHabitScreen(
         mutableStateOf(existingHabit?.targetType ?: "")
     }
     var typeExpanded by remember { mutableStateOf(false) }
+
+    // Weekly frequency dropdown
+    val weeklyOptions = (2..7).map { "$it Days" }
+    var selectedFrequency by remember(existingHabit) {
+        mutableStateOf(
+            existingHabit?.targetTimesPerWeek?.let { "$it Days" } ?: ""
+        )
+    }
+    var frequencyExpanded by remember { mutableStateOf(false) }
 
     val isEditing = existingHabit != null
 
@@ -82,35 +91,34 @@ fun AddHabitScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
 
+            // Habit Name
             OutlinedTextField(
                 value = habitName,
                 onValueChange = { habitName = it },
                 label = { Text("Habit Name...") },
                 singleLine = true,
-                modifier = Modifier.width(380.dp)
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(60.dp))
-
+            // Category Dropdown
             ExposedDropdownMenuBox(
                 expanded = categoryExpanded,
                 onExpandedChange = { categoryExpanded = !categoryExpanded }
             ) {
-
                 OutlinedTextField(
                     value = selectedCategory,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Category...") },
-                    singleLine = true,
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded)
                     },
-                    modifier = Modifier.menuAnchor().width(380.dp)
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
                 )
 
                 ExposedDropdownMenu(
@@ -129,23 +137,22 @@ fun AddHabitScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(60.dp))
-
+            // Habit Type Dropdown
             ExposedDropdownMenuBox(
                 expanded = typeExpanded,
                 onExpandedChange = { typeExpanded = !typeExpanded }
             ) {
-
                 OutlinedTextField(
                     value = selectedHabitType,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Habit Type...") },
-                    singleLine = true,
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeExpanded)
                     },
-                    modifier = Modifier.menuAnchor().width(380.dp)
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
                 )
 
                 ExposedDropdownMenu(
@@ -164,24 +171,67 @@ fun AddHabitScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(120.dp))
+            // Weekly Frequency (ONLY if Weekly selected)
+            if (selectedHabitType == "Weekly") {
 
+                ExposedDropdownMenuBox(
+                    expanded = frequencyExpanded,
+                    onExpandedChange = { frequencyExpanded = !frequencyExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedFrequency,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Frequency...") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = frequencyExpanded)
+                        },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = frequencyExpanded,
+                        onDismissRequest = { frequencyExpanded = false }
+                    ) {
+                        weeklyOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    selectedFrequency = option
+                                    frequencyExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Save Button
             Button(
                 onClick = {
+
+                    val frequencyInt =
+                        if (selectedHabitType == "Weekly")
+                            selectedFrequency.substringBefore(" ").toIntOrNull()
+                        else null
 
                     val habit = existingHabit?.copy(
                         habitName = habitName.trim(),
                         habitCategory = selectedCategory,
-                        targetType = selectedHabitType
+                        targetType = selectedHabitType,
+                        targetTimesPerWeek = frequencyInt
                     ) ?: HabitItem(
                         habitName = habitName.trim(),
                         habitCategory = selectedCategory,
-                        targetType = selectedHabitType
+                        targetType = selectedHabitType,
+                        targetTimesPerWeek = frequencyInt
                     )
 
                     onSaveHabit(habit)
                 },
-                modifier = Modifier.width(250.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     if (isEditing) "Update Habit" else "Add Habit",

@@ -9,7 +9,7 @@ import com.example.smarthabit.database.entity.LogItem
 
 @Database(
     entities = [HabitItem::class, LogItem::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class SmartHabitDatabase : RoomDatabase() {

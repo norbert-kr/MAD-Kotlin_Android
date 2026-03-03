@@ -10,15 +10,17 @@ import com.example.smarthabit.database.entity.HabitItem
 sealed interface NavObjects : NavKey {
 
     @Serializable
-    data object LoginScreen : NavObjects, NavKey
+    data object LoginScreen : NavObjects
 
     @Serializable
-    data object ListHabitScreen : NavObjects, NavKey
+    data object ListHabitScreen : NavObjects
 
     @Serializable
-    data object AddHabitScreen : NavObjects, NavKey
+    data object AddHabitScreen : NavObjects
 
     @Serializable
-    data class EditHabitScreen(val habit: HabitItem) : NavObjects, NavKey
+    data class EditHabitScreen(val habit: HabitItem) : NavObjects
 
+    @Serializable
+    data class ViewHabitScreen(val habit: HabitItem) : NavObjects
 }
