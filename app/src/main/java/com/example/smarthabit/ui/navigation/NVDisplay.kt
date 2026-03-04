@@ -116,19 +116,15 @@ fun NVDisplay(modifier: Modifier = Modifier) {
                         )
                     }
 
-                is NavObjects.ViewHabitScreen ->
-                    NavEntry(route) {
-                        ViewHabitScreen(
-                            modifier = modifier,
-                            habit = route.habit,
-                            onUp = { backStack.removeLastOrNull() },
-                            onToggleStatus = { updatedHabit ->
-                                habitVm.upsertHabit(updatedHabit)
-                                backStack.removeLastOrNull()
-                            },
-                            logVm = logVm   // 🔹 Pass LogViewModel here
-                        )
-                    }
+                is NavObjects.ViewHabitScreen -> NavEntry(route) {
+                    ViewHabitScreen(
+                        modifier = modifier,
+                        habit = route.habit,
+                        onUp = { backStack.removeLastOrNull() },
+                        logVm = logVm
+                    )
+                }
+
 
                 else -> error("Unknown route: $route")
             }

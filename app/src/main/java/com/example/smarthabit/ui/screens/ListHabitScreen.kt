@@ -88,7 +88,6 @@ fun ListHabitScreen(
 
                             Text(text = "Category: ${habit.habitCategory}")
                             Text(text = "Type: ${habit.targetType}")
-                            Text(text = "Status: ${habit.status}")
                         }
 
                         Row {
