@@ -18,4 +18,6 @@ interface LogDao {
 
     @Delete
     suspend fun deleteLog(log: LogItem)
+
+
 }

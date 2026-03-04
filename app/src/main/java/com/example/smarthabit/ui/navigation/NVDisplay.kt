@@ -126,7 +126,6 @@ fun NVDisplay(modifier: Modifier = Modifier) {
                 }
 
 
-
                 else -> error("Unknown route: $route")
             }
         }

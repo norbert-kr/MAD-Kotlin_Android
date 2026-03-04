@@ -62,7 +62,7 @@ fun ViewHabitScreen(
             Text(text = "Name: ${habit.habitName}", fontSize = 20.sp)
             Text(text = "Category: ${habit.habitCategory}", fontSize = 18.sp)
             Text(text = "Type: ${habit.targetType}", fontSize = 18.sp)
-            Text(text = "Start Date: $formattedDate", fontSize = 16.sp)
+            Text(text = "Created On: $formattedDate", fontSize = 16.sp)
 
             Text(
                 text = "Target: $target",
