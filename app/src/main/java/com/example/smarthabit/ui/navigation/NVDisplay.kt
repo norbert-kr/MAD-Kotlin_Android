@@ -76,6 +76,7 @@ fun NVDisplay(modifier: Modifier = Modifier) {
                         ListHabitScreen(
                             modifier = modifier,
                             habits = habits,
+                            logVm = logVm,
                             onOpenAddHabitScreen = {
                                 backStack.add(NavObjects.AddHabitScreen)
                             },
