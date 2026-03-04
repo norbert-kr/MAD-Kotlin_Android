@@ -16,9 +16,6 @@ interface LogDao {
     @Query("SELECT * FROM habitlogs WHERE habitId = :habitId")
     fun getLogsForHabit(habitId: Int): Flow<List<LogItem>>
 
-    @Delete
-    suspend fun deleteLog(log: LogItem)
-
     @Query("""
         SELECT * FROM habitlogs
         WHERE habitId = :habitId
@@ -31,5 +28,6 @@ interface LogDao {
         end: Long
     ): Flow<List<LogItem>>
 
-
+    @Delete
+    suspend fun deleteLog(log: LogItem)
 }

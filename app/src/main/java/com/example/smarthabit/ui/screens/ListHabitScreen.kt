@@ -21,16 +21,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarthabit.database.entity.HabitItem
+import com.example.smarthabit.viewmodel.LogViewModel
 
 @Composable
 fun ListHabitScreen(
     modifier: Modifier = Modifier,
     habits: List<HabitItem>,
+    logVm: LogViewModel,
     onOpenAddHabitScreen: () -> Unit,
     onViewHabit: (HabitItem) -> Unit,
     onEditHabit: (HabitItem) -> Unit,
@@ -65,6 +69,18 @@ fun ListHabitScreen(
 
             items(habits, key = { it.habitId }) { habit ->
 
+                val logs by if (habit.targetType == "Daily") {
+                    logVm.getTodayLogs(habit.habitId).collectAsState(initial = emptyList())
+                } else {
+                    logVm.getThisWeekLogs(habit.habitId).collectAsState(initial = emptyList())
+                }
+
+                val status =
+                    if (logs.size >= habit.targetTimesPerWeek)
+                        "Completed"
+                    else
+                        "Active"
+
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -88,6 +104,7 @@ fun ListHabitScreen(
 
                             Text(text = "Category: ${habit.habitCategory}")
                             Text(text = "Type: ${habit.targetType}")
+                            Text(text = "Status: $status")
                         }
 
                         Row {
