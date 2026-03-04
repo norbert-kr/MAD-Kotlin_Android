@@ -29,10 +29,13 @@ fun ViewHabitScreen(
         Locale.getDefault()
     ).format(Date(habit.startDate))
 
-    val logs by logVm
-        .getLogsForHabit(habit.habitId)
-        .collectAsState(initial = emptyList())
-
+    val logs by if (habit.targetType == "Daily") {
+        logVm.getTodayLogs(habit.habitId)
+            .collectAsState(initial = emptyList())
+    } else {
+        logVm.getThisWeekLogs(habit.habitId)
+            .collectAsState(initial = emptyList())
+    }
     val target = habit.targetTimesPerWeek
 
     Scaffold(

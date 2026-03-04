@@ -19,5 +19,17 @@ interface LogDao {
     @Delete
     suspend fun deleteLog(log: LogItem)
 
+    @Query("""
+        SELECT * FROM habitlogs
+        WHERE habitId = :habitId
+        AND logDate BETWEEN :start AND :end
+        ORDER BY logDate ASC
+    """)
+    fun getLogsForHabitBetween(
+        habitId: Int,
+        start: Long,
+        end: Long
+    ): Flow<List<LogItem>>
+
 
 }
