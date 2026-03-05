@@ -1,5 +1,4 @@
 package com.example.smarthabit.ui.screens
-
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,6 +23,11 @@ import com.example.smarthabit.viewmodel.LogViewModel
 import com.example.smarthabit.ui.components.ConfirmDialog
 import kotlinx.coroutines.launch
 
+
+/**
+ * Main screen displaying the list of habits.
+ * Allows filtering, viewing, editing and deleting habits.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ListHabitScreen(
@@ -36,12 +40,15 @@ fun ListHabitScreen(
     onDeleteHabit: (HabitItem) -> Unit
 ) {
 
+    // Status filter dropdown state
     var statusFilter by remember { mutableStateOf("All") }
     var expanded by remember { mutableStateOf(false) }
 
+    // Delete confirmation dialog state
     var showDeleteDialog by remember { mutableStateOf(false) }
     var selectedHabit by remember { mutableStateOf<HabitItem?>(null) }
 
+    // Pager tabs for filtering habits by type
     val pages = listOf("All", "Daily", "Weekly")
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val scope = rememberCoroutineScope()
@@ -89,6 +96,7 @@ fun ListHabitScreen(
 
         Spacer(modifier = Modifier.height(15.dp))
 
+        // Dropdown filter for habit status (All / Active / Completed)
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
@@ -142,6 +150,7 @@ fun ListHabitScreen(
             pageSpacing = 16.dp
         ) { pageIndex ->
 
+            // Filter habits depending on selected pager tab
             val filteredHabits = habits.filter {
 
                 when (pageIndex) {
@@ -160,6 +169,7 @@ fun ListHabitScreen(
 
                 items(filteredHabits, key = { it.habitId }) { habit ->
 
+                    // Retrieve logs depending on habit type
                     val logs by if (habit.targetType == "Daily") {
                         logVm.getTodayLogs(habit.habitId)
                             .collectAsState(initial = emptyList())
@@ -168,6 +178,7 @@ fun ListHabitScreen(
                             .collectAsState(initial = emptyList())
                     }
 
+                    // Determine habit completion status
                     val status =
                         if (logs.size >= habit.targetTimesPerWeek)
                             "Completed"
@@ -265,6 +276,7 @@ fun ListHabitScreen(
         }
     }
 
+    // Confirmation dialog before deleting a habit
     if (showDeleteDialog && selectedHabit != null) {
 
         ConfirmDialog(
@@ -278,4 +290,3 @@ fun ListHabitScreen(
         )
     }
 }
-

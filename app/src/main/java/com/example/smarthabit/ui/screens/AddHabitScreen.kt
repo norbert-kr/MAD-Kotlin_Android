@@ -16,6 +16,11 @@ import androidx.compose.ui.unit.sp
 import com.example.smarthabit.database.entity.HabitItem
 import com.example.smarthabit.ui.components.AlertDialogMessage
 
+
+/**
+ * Screen used to create a new habit or edit an existing one.
+ * Displays input fields and handles validation before saving.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddHabitScreen(
@@ -25,6 +30,7 @@ fun AddHabitScreen(
     onSaveHabit: (HabitItem) -> Unit
 ) {
 
+    // Form state (pre-filled when editing an existing habit)
     var habitName by remember(existingHabit) {
         mutableStateOf(existingHabit?.habitName ?: "")
     }
@@ -41,6 +47,7 @@ fun AddHabitScreen(
     }
     var typeExpanded by remember { mutableStateOf(false) }
 
+    // Weekly frequency options (2–7 days)
     val weeklyOptions = (2..7).map { "$it Days" }
     var selectedFrequency by remember(existingHabit) {
         mutableStateOf(
@@ -159,6 +166,7 @@ fun AddHabitScreen(
                     }
                 }
 
+                // Only show frequency selector if habit type is weekly
                 if (selectedHabitType == "Weekly") {
 
                     ExposedDropdownMenuBox(
@@ -199,6 +207,7 @@ fun AddHabitScreen(
             Button(
                 onClick = {
 
+                    // Basic validation to ensure required fields are filled
                     val invalid =
                         habitName.trim().isEmpty() ||
                                 selectedCategory.isEmpty() ||
@@ -210,6 +219,7 @@ fun AddHabitScreen(
                         return@Button
                     }
 
+                    // Convert frequency selection into integer value
                     val frequencyInt = when (selectedHabitType) {
                         "Daily" -> 1
                         "Weekly" -> selectedFrequency
@@ -218,6 +228,7 @@ fun AddHabitScreen(
                         else -> 1
                     }
 
+                    // Create new habit or update existing one
                     val habit = existingHabit?.copy(
                         habitName = habitName.trim(),
                         habitCategory = selectedCategory,
@@ -241,6 +252,7 @@ fun AddHabitScreen(
         }
     }
 
+    // Show alert if required fields are missing
     if (showAlert) {
         AlertDialogMessage(
             title = "Missing Information",
@@ -249,4 +261,3 @@ fun AddHabitScreen(
         )
     }
 }
-

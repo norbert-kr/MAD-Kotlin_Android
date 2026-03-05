@@ -1,5 +1,4 @@
 package com.example.smarthabit.ui.screens
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +20,11 @@ import com.example.smarthabit.ui.components.AlertDialogMessage
 import java.text.SimpleDateFormat
 import java.util.*
 
+
+/**
+ * Screen displaying detailed information about a habit.
+ * Shows progress, streak and allows logging activity.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewHabitScreen(
@@ -30,11 +34,13 @@ fun ViewHabitScreen(
     logVm: LogViewModel
 ) {
 
+    // Format the date the habit was created
     val createdDate = SimpleDateFormat(
         "dd MMM yyyy • HH:mm",
         Locale.getDefault()
     ).format(Date(habit.startDate))
 
+    // Retrieve logs depending on habit type (daily or weekly)
     val logs by if (habit.targetType == "Daily") {
         logVm.getTodayLogs(habit.habitId)
             .collectAsState(initial = emptyList())
@@ -43,11 +49,14 @@ fun ViewHabitScreen(
             .collectAsState(initial = emptyList())
     }
 
+    // Current streak calculated in the ViewModel
     val streak by logVm
         .getDailyStreak(habit.habitId)
         .collectAsState(initial = 0)
 
     val target = habit.targetTimesPerWeek
+
+    // Progress based on completed logs vs target
     val progress = logs.size.toFloat() / target.toFloat()
 
     val completed = logVm.isHabitCompleted(logs, target)
@@ -198,6 +207,7 @@ fun ViewHabitScreen(
             Button(
                 onClick = {
 
+                    // Prevent logging more than once per day
                     if (logVm.hasLoggedToday(logs)) {
                         showDailyLimitDialog = true
                     } else {
@@ -213,6 +223,7 @@ fun ViewHabitScreen(
         }
     }
 
+    // Confirmation dialog before creating a log
     if (showLogDialog) {
         ConfirmDialog(
             title = "Log Activity",
@@ -225,6 +236,7 @@ fun ViewHabitScreen(
         )
     }
 
+    // Alert shown if user already logged today
     if (showDailyLimitDialog) {
         AlertDialogMessage(
             title = "Daily Limit",
