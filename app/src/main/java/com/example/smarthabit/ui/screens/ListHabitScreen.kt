@@ -14,7 +14,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarthabit.database.entity.HabitItem
@@ -57,6 +59,7 @@ fun ListHabitScreen(
         )
 
         Spacer(modifier = Modifier.height(15.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -72,6 +75,7 @@ fun ListHabitScreen(
                     text = label,
                     fontSize = 18.sp,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                    color = if (selected) Color(0xFF0D47A1) else Color(0xFF9E9E9E),
                     modifier = Modifier
                         .clickable {
                             scope.launch {
@@ -82,6 +86,7 @@ fun ListHabitScreen(
                 )
             }
         }
+
         Spacer(modifier = Modifier.height(15.dp))
 
         ExposedDropdownMenuBox(
@@ -120,15 +125,14 @@ fun ListHabitScreen(
             }
         }
 
-
         Spacer(modifier = Modifier.height(15.dp))
-
 
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            pageSpacing = 16.dp
         ) { pageIndex ->
 
             val filteredHabits = habits.filter {
@@ -163,6 +167,10 @@ fun ListHabitScreen(
                         else
                             "Active"
 
+                    val statusColor =
+                        if (status == "Completed") Color(0xFF4CAF50)
+                        else Color(0xFFFFB300) // amber
+
                     val passesFilter =
                         statusFilter == "All" ||
                                 (statusFilter == "Active" && status == "Active") ||
@@ -180,26 +188,41 @@ fun ListHabitScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
 
                                 Column {
 
-                                    Text(habit.habitName, fontSize = 18.sp)
+                                    Text(
+                                        text = habit.habitName,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
 
                                     Spacer(modifier = Modifier.height(4.dp))
 
-                                    Text("Category: ${habit.habitCategory}")
-                                    Text("Type: ${habit.targetType}")
-                                    Text("Status: $status")
+                                    Text( text = habit.habitCategory)
+                                    Text( text =habit.targetType)
+                                    Text(
+                                        text = status,
+                                        color = statusColor,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
 
-                                Row {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
 
                                     IconButton(
                                         onClick = { onViewHabit(habit) }
                                     ) {
-                                        Text("View")
+                                        Text(
+                                            text = "View",
+                                            color = Color(0xFF0D47A1),
+                                            textDecoration = TextDecoration.Underline
+                                        )
                                     }
 
                                     IconButton(
@@ -248,4 +271,3 @@ fun ListHabitScreen(
         )
     }
 }
-

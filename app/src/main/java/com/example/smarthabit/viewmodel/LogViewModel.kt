@@ -137,4 +137,6 @@ class LogViewModel(
         c.add(Calendar.DAY_OF_YEAR, -1)
         return c.timeInMillis
     }
+
+
 }
