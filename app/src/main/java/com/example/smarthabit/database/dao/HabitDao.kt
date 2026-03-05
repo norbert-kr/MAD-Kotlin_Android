@@ -7,15 +7,22 @@ import androidx.room.Upsert
 import com.example.smarthabit.database.entity.HabitItem
 import kotlinx.coroutines.flow.Flow
 
+
+/**
+ * Data Access Object - providing
+ * basic insert, retrieve, delete operations for habits.
+ */
+
 @Dao
 interface HabitDao {
 
+    // Basic insert, update, retrieve and delete operations
     @Upsert
     suspend fun upsertHabit(habit: HabitItem)
 
     @Query("SELECT * FROM habits ORDER BY habitId DESC")
-    fun getAllHabits(): Flow<List<HabitItem>>
 
+    fun getAllHabits(): Flow<List<HabitItem>>
     @Delete
     suspend fun deleteHabit(habit: HabitItem)
 }

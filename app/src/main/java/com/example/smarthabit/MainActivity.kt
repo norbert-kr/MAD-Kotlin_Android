@@ -1,5 +1,4 @@
 package com.example.smarthabit
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,14 +11,23 @@ import com.example.smarthabit.ui.theme.SmartHabitTheme
 import com.example.smarthabit.ui.navigation.NVDisplay
 
 
+/**
+ * Main entry point of the application.
+ * Initializes the UI and loads the main navigation display.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
+
         setContent {
             SmartHabitTheme {
+
+                // Root layout container for the app
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+
+                    // Main navigation system
                     NVDisplay(
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -28,5 +36,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 

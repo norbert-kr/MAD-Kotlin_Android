@@ -1,5 +1,4 @@
 package com.example.smarthabit.ui.screens
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +20,11 @@ import com.example.smarthabit.ui.components.AlertDialogMessage
 import java.text.SimpleDateFormat
 import java.util.*
 
+
+/**
+ * Screen displaying detailed information about a habit.
+ * Shows progress, streak and allows logging activity.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewHabitScreen(
@@ -30,20 +34,13 @@ fun ViewHabitScreen(
     logVm: LogViewModel
 ) {
 
-    fun isSameDay(timeMillis: Long): Boolean {
-        val cal1 = Calendar.getInstance()
-        val cal2 = Calendar.getInstance()
-        cal1.timeInMillis = timeMillis
-        cal2.timeInMillis = System.currentTimeMillis()
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
-    }
-
+    // Format the date the habit was created
     val createdDate = SimpleDateFormat(
         "dd MMM yyyy • HH:mm",
         Locale.getDefault()
     ).format(Date(habit.startDate))
 
+    // Retrieve logs depending on habit type (daily or weekly)
     val logs by if (habit.targetType == "Daily") {
         logVm.getTodayLogs(habit.habitId)
             .collectAsState(initial = emptyList())
@@ -52,15 +49,20 @@ fun ViewHabitScreen(
             .collectAsState(initial = emptyList())
     }
 
+    // Current streak calculated in the ViewModel
     val streak by logVm
         .getDailyStreak(habit.habitId)
         .collectAsState(initial = 0)
 
     val target = habit.targetTimesPerWeek
+
+    // Progress based on completed logs vs target
     val progress = logs.size.toFloat() / target.toFloat()
 
+    val completed = logVm.isHabitCompleted(logs, target)
+
     val status =
-        if (logs.size >= target) "Completed"
+        if (completed) "Completed"
         else "Active"
 
     var showLogDialog by remember { mutableStateOf(false) }
@@ -204,7 +206,9 @@ fun ViewHabitScreen(
 
             Button(
                 onClick = {
-                    if (logs.any { isSameDay(it.logDate) }) {
+
+                    // Prevent logging more than once per day
+                    if (logVm.hasLoggedToday(logs)) {
                         showDailyLimitDialog = true
                     } else {
                         showLogDialog = true
@@ -214,11 +218,12 @@ fun ViewHabitScreen(
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                Text("+ Add New Habit", fontSize = 22.sp)
+                Text("+ Log Activity", fontSize = 22.sp)
             }
         }
     }
 
+    // Confirmation dialog before creating a log
     if (showLogDialog) {
         ConfirmDialog(
             title = "Log Activity",
@@ -231,6 +236,7 @@ fun ViewHabitScreen(
         )
     }
 
+    // Alert shown if user already logged today
     if (showDailyLimitDialog) {
         AlertDialogMessage(
             title = "Daily Limit",
@@ -239,4 +245,3 @@ fun ViewHabitScreen(
         )
     }
 }
-

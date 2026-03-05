@@ -1,5 +1,4 @@
 package com.example.smarthabit.ui.screens
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,12 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+
+/**
+ * Simple login screen used as the entry point of the app.
+ * Currently just navigates to the habit list.
+ */
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
     onOpenListHabitScreen: () -> Unit,
 ) {
-
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -46,9 +49,5 @@ fun LoginScreen(
             )
         }
 
-
     }
-
-
-
 }

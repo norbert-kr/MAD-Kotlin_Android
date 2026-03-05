@@ -1,8 +1,12 @@
 package com.example.smarthabit.database
-
 import android.content.Context
 import androidx.room.Room
 
+
+/**
+ * Singleton provider for the Room database.
+ * Ensures only one database instance exists during the app lifecycle.
+ */
 object DatabaseInstance {
 
     @Volatile
@@ -10,6 +14,7 @@ object DatabaseInstance {
 
     fun getDatabase(context: Context): SmartHabitDatabase {
 
+        // Create the database if it does not exist, otherwise return the existing instance
         return INSTANCE ?: synchronized(this) {
             val instance = Room.databaseBuilder(
                 context.applicationContext,

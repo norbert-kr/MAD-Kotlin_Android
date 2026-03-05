@@ -13,7 +13,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.example.smarthabit.database.DatabaseInstance
-import com.example.smarthabit.database.entity.HabitItem
 import com.example.smarthabit.ui.screens.LoginScreen
 import com.example.smarthabit.ui.screens.ListHabitScreen
 import com.example.smarthabit.ui.screens.AddHabitScreen
@@ -21,21 +20,27 @@ import com.example.smarthabit.ui.screens.ViewHabitScreen
 import com.example.smarthabit.viewmodel.HabitViewModel
 import com.example.smarthabit.viewmodel.LogViewModel
 
+
+/**
+ * Main navigation display for the app.
+ * Handles screen routing and initializes required ViewModels.
+ */
 @Composable
 fun NVDisplay(modifier: Modifier = Modifier) {
 
+    // Navigation back stack starting with the login screen
     val backStack = remember {
         mutableStateListOf<Any>(NavObjects.LoginScreen)
     }
 
     val context = LocalContext.current.applicationContext
 
-    // 🔹 Get full database instance
+    // Initialize database instance
     val database = remember(context) {
         DatabaseInstance.getDatabase(context)
     }
 
-    // 🔹 Habit ViewModel
+    // ViewModel for managing habits
     val habitVm: HabitViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
@@ -44,7 +49,7 @@ fun NVDisplay(modifier: Modifier = Modifier) {
         }
     )
 
-    // 🔹 Log ViewModel
+    // ViewModel for managing habit logs
     val logVm: LogViewModel = viewModel(
         factory = viewModelFactory {
             initializer {
@@ -53,11 +58,15 @@ fun NVDisplay(modifier: Modifier = Modifier) {
         }
     )
 
+    // Observe habits from ViewModel
     val habits by habitVm.habits.collectAsStateWithLifecycle()
+
 
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
+
+        // Defines how each navigation route maps to a screen
         entryProvider = { route ->
 
             when (route) {
@@ -125,7 +134,6 @@ fun NVDisplay(modifier: Modifier = Modifier) {
                         logVm = logVm
                     )
                 }
-
 
                 else -> error("Unknown route: $route")
             }
