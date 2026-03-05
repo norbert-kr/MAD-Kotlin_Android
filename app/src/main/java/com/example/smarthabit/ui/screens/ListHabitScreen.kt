@@ -109,13 +109,20 @@ fun ListHabitScreen(
 
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
             ) {
 
                 listOf("All", "Active", "Completed").forEach { option ->
 
                     DropdownMenuItem(
-                        text = { Text(option) },
+                        modifier = Modifier.fillMaxWidth(),
+                        text = {
+                            Text(
+                                text = option,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
                         onClick = {
                             statusFilter = option
                             expanded = false
@@ -169,7 +176,7 @@ fun ListHabitScreen(
 
                     val statusColor =
                         if (status == "Completed") Color(0xFF4CAF50)
-                        else Color(0xFFFFB300) // amber
+                        else Color(0xFFFFB300)
 
                     val passesFilter =
                         statusFilter == "All" ||
@@ -202,8 +209,8 @@ fun ListHabitScreen(
 
                                     Spacer(modifier = Modifier.height(4.dp))
 
-                                    Text( text = habit.habitCategory)
-                                    Text( text =habit.targetType)
+                                    Text(text = habit.habitCategory)
+                                    Text(text = habit.targetType)
                                     Text(
                                         text = status,
                                         color = statusColor,
@@ -271,3 +278,4 @@ fun ListHabitScreen(
         )
     }
 }
+

@@ -9,12 +9,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarthabit.database.entity.HabitItem
-import com.example.smarthabit.database.entity.LogItem
 import com.example.smarthabit.viewmodel.LogViewModel
 import com.example.smarthabit.ui.components.ConfirmDialog
+import com.example.smarthabit.ui.components.AlertDialogMessage
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,6 +29,15 @@ fun ViewHabitScreen(
     onUp: () -> Unit,
     logVm: LogViewModel
 ) {
+
+    fun isSameDay(timeMillis: Long): Boolean {
+        val cal1 = Calendar.getInstance()
+        val cal2 = Calendar.getInstance()
+        cal1.timeInMillis = timeMillis
+        cal2.timeInMillis = System.currentTimeMillis()
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+    }
 
     val createdDate = SimpleDateFormat(
         "dd MMM yyyy • HH:mm",
@@ -45,7 +57,6 @@ fun ViewHabitScreen(
         .collectAsState(initial = 0)
 
     val target = habit.targetTimesPerWeek
-
     val progress = logs.size.toFloat() / target.toFloat()
 
     val status =
@@ -53,9 +64,7 @@ fun ViewHabitScreen(
         else "Active"
 
     var showLogDialog by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
-    var selectedLog by remember { mutableStateOf<LogItem?>(null) }
+    var showDailyLimitDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -74,63 +83,119 @@ fun ViewHabitScreen(
             modifier = modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
 
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
-                Text("Name: ${habit.habitName}", fontSize = 20.sp)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(3.dp)
+                ) {
 
-                Text("Category: ${habit.habitCategory}", fontSize = 18.sp)
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
 
-                Text("Type: ${habit.targetType}", fontSize = 18.sp)
+                        Text(
+                            text = habit.habitName,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
 
-                Text("Status: $status", fontSize = 18.sp)
+                        Text("Category: ${habit.habitCategory}")
+                        Text("Type: ${habit.targetType}")
+                        Text("Status: $status")
+                        Text("Streak: $streak days")
+                        Text("Created: $createdDate")
+                    }
+                }
 
-                Text("Streak: $streak days", fontSize = 18.sp)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(3.dp)
+                ) {
 
-                Text("Created On: $createdDate", fontSize = 16.sp)
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
 
-                Text("Target: $target", fontSize = 20.sp)
+                        Text(
+                            "Progress",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
 
-                LinearProgressIndicator(
-                    progress = progress,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                )
-
-                Text("${logs.size} / $target completed")
-
-                Text("Logs", fontSize = 18.sp)
-
-                LazyColumn {
-
-                    items(logs) { log ->
-
-                        val formatted = SimpleDateFormat(
-                            "dd MMM yyyy • HH:mm",
-                            Locale.getDefault()
-                        ).format(Date(log.logDate))
-
-                        Row(
+                        LinearProgressIndicator(
+                            progress = progress,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                                .height(8.dp)
+                        )
 
-                            Text("Completed At: $formatted")
+                        Text("${logs.size} / $target completed")
+                    }
+                }
 
-                            TextButton(
-                                onClick = {
-                                    selectedLog = log
-                                    showDeleteDialog = true
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(3.dp)
+                ) {
+
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+
+                        Text(
+                            text = "Activity Logs",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        LazyColumn {
+
+                            if (logs.isEmpty()) {
+
+                                item {
+                                    Text(
+                                        text = "No activity logged yet.",
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Center
+                                    )
                                 }
-                            ) {
-                                Text("Remove")
+
+                            } else {
+
+                                items(logs) { log ->
+
+                                    val formatted = SimpleDateFormat(
+                                        "dd MMM yyyy • HH:mm",
+                                        Locale.getDefault()
+                                    ).format(Date(log.logDate))
+
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+
+                                        Text(
+                                            text = formatted,
+                                            fontSize = 16.sp,
+                                            color = Color(0xFF0D47A1)
+                                        )
+
+                                        Spacer(modifier = Modifier.height(6.dp))
+
+                                        Divider()
+                                    }
+                                }
                             }
                         }
                     }
@@ -138,19 +203,23 @@ fun ViewHabitScreen(
             }
 
             Button(
-                onClick = { showLogDialog = true },
+                onClick = {
+                    if (logs.any { isSameDay(it.logDate) }) {
+                        showDailyLimitDialog = true
+                    } else {
+                        showLogDialog = true
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-
             ) {
-                Text("+ Log Activity", fontSize = 22.sp)
+                Text("+ Add New Habit", fontSize = 22.sp)
             }
         }
     }
 
     if (showLogDialog) {
-
         ConfirmDialog(
             title = "Log Activity",
             message = "Do you want to log an activity?",
@@ -158,24 +227,16 @@ fun ViewHabitScreen(
                 logVm.createLog(habit.habitId)
                 showLogDialog = false
             },
-            onDismiss = {
-                showLogDialog = false
-            }
+            onDismiss = { showLogDialog = false }
         )
     }
 
-    if (showDeleteDialog && selectedLog != null) {
-
-        ConfirmDialog(
-            title = "Remove Activity",
-            message = "Do you want to remove this activity?",
-            onConfirm = {
-                logVm.deleteLog(selectedLog!!)
-                showDeleteDialog = false
-            },
-            onDismiss = {
-                showDeleteDialog = false
-            }
+    if (showDailyLimitDialog) {
+        AlertDialogMessage(
+            title = "Daily Limit",
+            message = "You can only log this habit once per day.",
+            onDismiss = { showDailyLimitDialog = false }
         )
     }
 }
+
