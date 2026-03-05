@@ -59,26 +59,21 @@ class LogViewModel(
         val c = Calendar.getInstance()
         c.firstDayOfWeek = Calendar.MONDAY
 
+        c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
         c.set(Calendar.HOUR_OF_DAY, 0)
         c.set(Calendar.MINUTE, 0)
         c.set(Calendar.SECOND, 0)
         c.set(Calendar.MILLISECOND, 0)
 
-        val dayOfWeek = c.get(Calendar.DAY_OF_WEEK)
-        val diff = if (dayOfWeek == Calendar.SUNDAY) -6 else Calendar.MONDAY - dayOfWeek
-        c.add(Calendar.DAY_OF_MONTH, diff)
-
         return c.timeInMillis
     }
+
 
     private fun endOfWeek(): Long {
         val c = Calendar.getInstance()
         c.firstDayOfWeek = Calendar.MONDAY
 
-        val dayOfWeek = c.get(Calendar.DAY_OF_WEEK)
-        val diff = if (dayOfWeek == Calendar.SUNDAY) 0 else Calendar.SUNDAY - dayOfWeek
-        c.add(Calendar.DAY_OF_MONTH, diff)
-
+        c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
         c.set(Calendar.HOUR_OF_DAY, 23)
         c.set(Calendar.MINUTE, 59)
         c.set(Calendar.SECOND, 59)
@@ -86,6 +81,7 @@ class LogViewModel(
 
         return c.timeInMillis
     }
+
 
     fun getTodayLogs(habitId: Int): Flow<List<LogItem>> {
         return logDao.getLogsForHabitBetween(habitId, startOfToday(), endOfToday())
@@ -141,4 +137,6 @@ class LogViewModel(
         c.add(Calendar.DAY_OF_YEAR, -1)
         return c.timeInMillis
     }
+
+
 }

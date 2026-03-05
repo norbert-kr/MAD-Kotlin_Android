@@ -9,10 +9,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarthabit.database.entity.HabitItem
 import com.example.smarthabit.viewmodel.LogViewModel
+import com.example.smarthabit.ui.components.ConfirmDialog
+import com.example.smarthabit.ui.components.AlertDialogMessage
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,24 +29,42 @@ fun ViewHabitScreen(
     onUp: () -> Unit,
     logVm: LogViewModel
 ) {
-    val formattedDate = SimpleDateFormat(
+
+    fun isSameDay(timeMillis: Long): Boolean {
+        val cal1 = Calendar.getInstance()
+        val cal2 = Calendar.getInstance()
+        cal1.timeInMillis = timeMillis
+        cal2.timeInMillis = System.currentTimeMillis()
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+    }
+
+    val createdDate = SimpleDateFormat(
         "dd MMM yyyy • HH:mm",
         Locale.getDefault()
     ).format(Date(habit.startDate))
 
-
-    val streak by logVm.getDailyStreak(habit.habitId)
-        .collectAsState(initial = 0)
-
-
     val logs by if (habit.targetType == "Daily") {
-        logVm.getTodayLogs(habit.habitId).collectAsState(initial = emptyList())
+        logVm.getTodayLogs(habit.habitId)
+            .collectAsState(initial = emptyList())
     } else {
-        logVm.getThisWeekLogs(habit.habitId).collectAsState(initial = emptyList())
+        logVm.getThisWeekLogs(habit.habitId)
+            .collectAsState(initial = emptyList())
     }
+
+    val streak by logVm
+        .getDailyStreak(habit.habitId)
+        .collectAsState(initial = 0)
 
     val target = habit.targetTimesPerWeek
     val progress = logs.size.toFloat() / target.toFloat()
+
+    val status =
+        if (logs.size >= target) "Completed"
+        else "Active"
+
+    var showLogDialog by remember { mutableStateOf(false) }
+    var showDailyLimitDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -49,7 +72,7 @@ fun ViewHabitScreen(
                 title = { Text("Habit Details") },
                 navigationIcon = {
                     IconButton(onClick = onUp) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, "Back")
                     }
                 }
             )
@@ -60,68 +83,160 @@ fun ViewHabitScreen(
             modifier = modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = "Name: ${habit.habitName}", fontSize = 20.sp)
-            Text(text = "Category: ${habit.habitCategory}", fontSize = 18.sp)
-            Text(text = "Type: ${habit.targetType}", fontSize = 18.sp)
-            Text(text = "Created On: $formattedDate", fontSize = 16.sp)
 
-            Text(text = "Streak: $streak day(s)", fontSize = 18.sp)
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
-            Text(text = "Target: $target", fontSize = 20.sp)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(3.dp)
+                ) {
 
-            LinearProgressIndicator(
-                progress = progress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-            )
-
-            Text("${logs.size} / $target completed")
-
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(target) { index ->
-                    val log = logs.getOrNull(index)
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        if (log != null) {
-                            val formatted = SimpleDateFormat(
-                                "dd MMM yyyy • HH:mm",
-                                Locale.getDefault()
-                            ).format(Date(log.logDate))
 
-                            Text("Log ${index + 1}: Completed on $formatted", fontSize = 16.sp)
+                        Text(
+                            text = habit.habitName,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
 
-                            Checkbox(
-                                checked = true,
-                                onCheckedChange = { checked ->
-                                    if (!checked) logVm.deleteLog(log)
+                        Text("Category: ${habit.habitCategory}")
+                        Text("Type: ${habit.targetType}")
+                        Text("Status: $status")
+                        Text("Streak: $streak days")
+                        Text("Created: $createdDate")
+                    }
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(3.dp)
+                ) {
+
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+
+                        Text(
+                            "Progress",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        LinearProgressIndicator(
+                            progress = progress,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                        )
+
+                        Text("${logs.size} / $target completed")
+                    }
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(3.dp)
+                ) {
+
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+
+                        Text(
+                            text = "Activity Logs",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        LazyColumn {
+
+                            if (logs.isEmpty()) {
+
+                                item {
+                                    Text(
+                                        text = "No activity logged yet.",
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Center
+                                    )
                                 }
-                            )
-                        } else {
-                            Text("Log ${index + 1}: Not completed", fontSize = 16.sp)
 
-                            Checkbox(
-                                checked = false,
-                                onCheckedChange = { checked ->
-                                    if (checked) logVm.createLog(habit.habitId)
+                            } else {
+
+                                items(logs) { log ->
+
+                                    val formatted = SimpleDateFormat(
+                                        "dd MMM yyyy • HH:mm",
+                                        Locale.getDefault()
+                                    ).format(Date(log.logDate))
+
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+
+                                        Text(
+                                            text = formatted,
+                                            fontSize = 16.sp,
+                                            color = Color(0xFF0D47A1)
+                                        )
+
+                                        Spacer(modifier = Modifier.height(6.dp))
+
+                                        Divider()
+                                    }
                                 }
-                            )
+                            }
                         }
                     }
                 }
             }
+
+            Button(
+                onClick = {
+                    if (logs.any { isSameDay(it.logDate) }) {
+                        showDailyLimitDialog = true
+                    } else {
+                        showLogDialog = true
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Text("+ Add New Habit", fontSize = 22.sp)
+            }
         }
     }
+
+    if (showLogDialog) {
+        ConfirmDialog(
+            title = "Log Activity",
+            message = "Do you want to log an activity?",
+            onConfirm = {
+                logVm.createLog(habit.habitId)
+                showLogDialog = false
+            },
+            onDismiss = { showLogDialog = false }
+        )
+    }
+
+    if (showDailyLimitDialog) {
+        AlertDialogMessage(
+            title = "Daily Limit",
+            message = "You can only log this habit once per day.",
+            onDismiss = { showDailyLimitDialog = false }
+        )
+    }
 }
+
