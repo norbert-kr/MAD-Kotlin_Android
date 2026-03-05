@@ -30,15 +30,6 @@ fun ViewHabitScreen(
     logVm: LogViewModel
 ) {
 
-    fun isSameDay(timeMillis: Long): Boolean {
-        val cal1 = Calendar.getInstance()
-        val cal2 = Calendar.getInstance()
-        cal1.timeInMillis = timeMillis
-        cal2.timeInMillis = System.currentTimeMillis()
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
-    }
-
     val createdDate = SimpleDateFormat(
         "dd MMM yyyy • HH:mm",
         Locale.getDefault()
@@ -59,8 +50,10 @@ fun ViewHabitScreen(
     val target = habit.targetTimesPerWeek
     val progress = logs.size.toFloat() / target.toFloat()
 
+    val completed = logVm.isHabitCompleted(logs, target)
+
     val status =
-        if (logs.size >= target) "Completed"
+        if (completed) "Completed"
         else "Active"
 
     var showLogDialog by remember { mutableStateOf(false) }
@@ -204,7 +197,8 @@ fun ViewHabitScreen(
 
             Button(
                 onClick = {
-                    if (logs.any { isSameDay(it.logDate) }) {
+
+                    if (logVm.hasLoggedToday(logs)) {
                         showDailyLimitDialog = true
                     } else {
                         showLogDialog = true
@@ -214,7 +208,7 @@ fun ViewHabitScreen(
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                Text("+ Add New Habit", fontSize = 22.sp)
+                Text("+ Log Activity", fontSize = 22.sp)
             }
         }
     }
@@ -239,4 +233,3 @@ fun ViewHabitScreen(
         )
     }
 }
-

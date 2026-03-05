@@ -13,9 +13,6 @@ class LogViewModel(
     private val logDao: LogDao
 ) : ViewModel() {
 
-    fun getLogsForHabit(habitId: Int): Flow<List<LogItem>> {
-        return logDao.getLogsForHabit(habitId)
-    }
 
     fun createLog(habitId: Int) {
         viewModelScope.launch {
@@ -29,12 +26,19 @@ class LogViewModel(
         }
     }
 
-    fun deleteLog(log: LogItem) {
-        viewModelScope.launch {
-            logDao.deleteLog(log)
+    fun hasLoggedToday(logs: List<LogItem>): Boolean {
+        val todayStart = startOfDayMillis(System.currentTimeMillis())
+        return logs.any {
+            startOfDayMillis(it.logDate) == todayStart
         }
     }
 
+    fun isHabitCompleted(
+        logs: List<LogItem>,
+        target: Int
+    ): Boolean {
+        return logs.size >= target
+    }
 
     private fun startOfToday(): Long {
         val c = Calendar.getInstance()
@@ -54,7 +58,6 @@ class LogViewModel(
         return c.timeInMillis
     }
 
-
     private fun startOfWeek(): Long {
         val c = Calendar.getInstance()
         c.firstDayOfWeek = Calendar.MONDAY
@@ -68,7 +71,6 @@ class LogViewModel(
         return c.timeInMillis
     }
 
-
     private fun endOfWeek(): Long {
         val c = Calendar.getInstance()
         c.firstDayOfWeek = Calendar.MONDAY
@@ -81,7 +83,6 @@ class LogViewModel(
 
         return c.timeInMillis
     }
-
 
     fun getTodayLogs(habitId: Int): Flow<List<LogItem>> {
         return logDao.getLogsForHabitBetween(habitId, startOfToday(), endOfToday())
@@ -137,6 +138,4 @@ class LogViewModel(
         c.add(Calendar.DAY_OF_YEAR, -1)
         return c.timeInMillis
     }
-
-
 }
