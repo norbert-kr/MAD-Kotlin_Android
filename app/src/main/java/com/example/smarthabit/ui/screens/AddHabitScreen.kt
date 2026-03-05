@@ -237,10 +237,9 @@ fun AddHabitScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(75.dp)
-                    .padding(bottom = 25.dp),
-                shape = ButtonDefaults.elevatedShape
+                    .padding(bottom = 25.dp)
             ) {
-                Text(text = "+ Add Activity", fontSize = 22.sp)
+                Text("+ Add New Habit", fontSize = 22.sp)
             }
 
 

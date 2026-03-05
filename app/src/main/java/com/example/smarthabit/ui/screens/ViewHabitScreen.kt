@@ -141,9 +141,10 @@ fun ViewHabitScreen(
                 onClick = { showLogDialog = true },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(65.dp)
+                    .height(75.dp)
+                    .padding(bottom = 25.dp)
             ) {
-                Text("Log Activity", fontSize = 20.sp)
+                Text("+ Log Activity", fontSize = 22.sp)
             }
         }
     }

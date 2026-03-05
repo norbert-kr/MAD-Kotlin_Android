@@ -50,14 +50,13 @@ fun ListHabitScreen(
             .padding(16.dp)
     ) {
 
-        Spacer(modifier = Modifier.height(40.dp))
-
         Text(
             text = "My Habits",
             fontSize = 30.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
+        Spacer(modifier = Modifier.height(15.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -83,6 +82,7 @@ fun ListHabitScreen(
                 )
             }
         }
+        Spacer(modifier = Modifier.height(15.dp))
 
         ExposedDropdownMenuBox(
             expanded = expanded,
@@ -120,6 +120,10 @@ fun ListHabitScreen(
             }
         }
 
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -137,7 +141,10 @@ fun ListHabitScreen(
             }
 
             LazyColumn(
-                modifier = Modifier.padding(vertical = 16.dp)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 16.dp),
+                verticalArrangement = Arrangement.Top
             ) {
 
                 items(filteredHabits, key = { it.habitId }) { habit ->
