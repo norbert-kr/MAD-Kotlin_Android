@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -233,11 +234,14 @@ fun AddHabitScreen(
 
                     onSaveHabit(habit)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(75.dp)
+                    .padding(bottom = 25.dp),
+                shape = ButtonDefaults.elevatedShape
             ) {
-                Text(if (isEditing) "Update Habit" else "Add Habit", fontSize = 20.sp)
+                Text(text = "+ Add Activity", fontSize = 22.sp)
             }
-
 
 
         }

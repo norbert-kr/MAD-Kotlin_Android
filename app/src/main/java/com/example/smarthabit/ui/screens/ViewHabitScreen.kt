@@ -12,7 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smarthabit.database.entity.HabitItem
+import com.example.smarthabit.database.entity.LogItem
 import com.example.smarthabit.viewmodel.LogViewModel
+import com.example.smarthabit.ui.components.ConfirmDialog
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,24 +26,36 @@ fun ViewHabitScreen(
     onUp: () -> Unit,
     logVm: LogViewModel
 ) {
-    val formattedDate = SimpleDateFormat(
+
+    val createdDate = SimpleDateFormat(
         "dd MMM yyyy • HH:mm",
         Locale.getDefault()
     ).format(Date(habit.startDate))
 
-
-    val streak by logVm.getDailyStreak(habit.habitId)
-        .collectAsState(initial = 0)
-
-
     val logs by if (habit.targetType == "Daily") {
-        logVm.getTodayLogs(habit.habitId).collectAsState(initial = emptyList())
+        logVm.getTodayLogs(habit.habitId)
+            .collectAsState(initial = emptyList())
     } else {
-        logVm.getThisWeekLogs(habit.habitId).collectAsState(initial = emptyList())
+        logVm.getThisWeekLogs(habit.habitId)
+            .collectAsState(initial = emptyList())
     }
 
+    val streak by logVm
+        .getDailyStreak(habit.habitId)
+        .collectAsState(initial = 0)
+
     val target = habit.targetTimesPerWeek
+
     val progress = logs.size.toFloat() / target.toFloat()
+
+    val status =
+        if (logs.size >= target) "Completed"
+        else "Active"
+
+    var showLogDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    var selectedLog by remember { mutableStateOf<LogItem?>(null) }
 
     Scaffold(
         topBar = {
@@ -49,7 +63,7 @@ fun ViewHabitScreen(
                 title = { Text("Habit Details") },
                 navigationIcon = {
                     IconButton(onClick = onUp) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, "Back")
                     }
                 }
             )
@@ -61,67 +75,106 @@ fun ViewHabitScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = "Name: ${habit.habitName}", fontSize = 20.sp)
-            Text(text = "Category: ${habit.habitCategory}", fontSize = 18.sp)
-            Text(text = "Type: ${habit.targetType}", fontSize = 18.sp)
-            Text(text = "Created On: $formattedDate", fontSize = 16.sp)
 
-            Text(text = "Streak: $streak day(s)", fontSize = 18.sp)
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
-            Text(text = "Target: $target", fontSize = 20.sp)
+                Text("Name: ${habit.habitName}", fontSize = 20.sp)
 
-            LinearProgressIndicator(
-                progress = progress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-            )
+                Text("Category: ${habit.habitCategory}", fontSize = 18.sp)
 
-            Text("${logs.size} / $target completed")
+                Text("Type: ${habit.targetType}", fontSize = 18.sp)
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(target) { index ->
-                    val log = logs.getOrNull(index)
+                Text("Status: $status", fontSize = 18.sp)
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        if (log != null) {
-                            val formatted = SimpleDateFormat(
-                                "dd MMM yyyy • HH:mm",
-                                Locale.getDefault()
-                            ).format(Date(log.logDate))
+                Text("Streak: $streak days", fontSize = 18.sp)
 
-                            Text("Log ${index + 1}: Completed on $formatted", fontSize = 16.sp)
+                Text("Created On: $createdDate", fontSize = 16.sp)
 
-                            Checkbox(
-                                checked = true,
-                                onCheckedChange = { checked ->
-                                    if (!checked) logVm.deleteLog(log)
+                Text("Target: $target", fontSize = 20.sp)
+
+                LinearProgressIndicator(
+                    progress = progress,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                )
+
+                Text("${logs.size} / $target completed")
+
+                Text("Logs", fontSize = 18.sp)
+
+                LazyColumn {
+
+                    items(logs) { log ->
+
+                        val formatted = SimpleDateFormat(
+                            "dd MMM yyyy • HH:mm",
+                            Locale.getDefault()
+                        ).format(Date(log.logDate))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Text("Completed At: $formatted")
+
+                            TextButton(
+                                onClick = {
+                                    selectedLog = log
+                                    showDeleteDialog = true
                                 }
-                            )
-                        } else {
-                            Text("Log ${index + 1}: Not completed", fontSize = 16.sp)
-
-                            Checkbox(
-                                checked = false,
-                                onCheckedChange = { checked ->
-                                    if (checked) logVm.createLog(habit.habitId)
-                                }
-                            )
+                            ) {
+                                Text("Remove")
+                            }
                         }
                     }
                 }
             }
+
+            Button(
+                onClick = { showLogDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(65.dp)
+            ) {
+                Text("Log Activity", fontSize = 20.sp)
+            }
         }
+    }
+
+    if (showLogDialog) {
+
+        ConfirmDialog(
+            title = "Log Activity",
+            message = "Do you want to log an activity?",
+            onConfirm = {
+                logVm.createLog(habit.habitId)
+                showLogDialog = false
+            },
+            onDismiss = {
+                showLogDialog = false
+            }
+        )
+    }
+
+    if (showDeleteDialog && selectedLog != null) {
+
+        ConfirmDialog(
+            title = "Remove Activity",
+            message = "Do you want to remove this activity?",
+            onConfirm = {
+                logVm.deleteLog(selectedLog!!)
+                showDeleteDialog = false
+            },
+            onDismiss = {
+                showDeleteDialog = false
+            }
+        )
     }
 }
